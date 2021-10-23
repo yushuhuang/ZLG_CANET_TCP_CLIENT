@@ -14,20 +14,16 @@
 #define HOST "192.168.0.178"
 #define PORT 4002
 
-void parse_frame(char (&frame)[13]) {
+void parse_frame(const char (&frame)[13]) {
   uint8_t FRAME_INFO = frame[0];
   bool extend_flag = FRAME_INFO >> 7;
   bool remote_flag = FRAME_INFO >> 6;
-  int frame_len = FRAME_INFO & 0xf;
+  uint8_t frame_len = FRAME_INFO & 0xf;
 
   uint32_t FRAME_ID;
   memcpy(&FRAME_ID, &frame[1], 4);
   FRAME_ID = ntohl(FRAME_ID);
-  if (extend_flag) {
-    FRAME_ID &= 0x1fffffff;
-  } else {
-    FRAME_ID &= 0x7ff;
-  }
+  FRAME_ID &= extend_flag ? 0x1fffffff : 0x7ff;
 
   uint64_t DATA{0};
   memcpy(&DATA, &frame[5], frame_len);
@@ -36,7 +32,7 @@ void parse_frame(char (&frame)[13]) {
 
   printf("%s %s 帧长度: %d\n", extend_flag ? "扩展帧" : "标准帧",
          remote_flag ? "远程帧" : "数据帧", frame_len);
-  printf("FRAME ID: 0x%08x\n", FRAME_ID);
+  printf("FRAME ID: 0x%0*x\n", extend_flag ? 8 : 4, FRAME_ID);
   printf("DATA: 0x%0*lx\n", frame_len * 2, DATA);
   printf("%s\n", std::string(80, '-').c_str());
 }
@@ -57,7 +53,7 @@ int main() {
     std::cerr << "Connection Failed" << std::endl;
   }
 
-  char frame[13]{0};
+  char frame[13];
   for (;;) {
     recv(sock_fd, &frame, 13, 0);
     parse_frame(frame);
