@@ -16,8 +16,8 @@
 
 void parse_frame(const char (&frame)[13]) {
   uint8_t FRAME_INFO = frame[0];
-  bool extend_flag = FRAME_INFO >> 7;
-  bool remote_flag = FRAME_INFO >> 6;
+  bool extend_flag = FRAME_INFO >> 7 & 1;
+  bool remote_flag = FRAME_INFO >> 6 & 1;
   uint8_t frame_len = FRAME_INFO & 0xf;
 
   uint32_t FRAME_ID;
