@@ -23,17 +23,13 @@ void build_frame(char (&frame)[13], bool FF, bool RTR, uint8_t LEN,
   memcpy(&frame[5], &DATA, sizeof(DATA));
 }
 
-bool send_all(int sock, char *buf, int size) {
-  int tmp_size{0};
-  char *ptr = buf;
-  while (size > 0) {
-    tmp_size = send(sock, ptr, size, 0);
-    if (tmp_size < 1)
-      return false;
-    ptr += tmp_size;
-    size -= tmp_size;
-  }
-  return true;
+bool send_all(int sock, char *buf, size_t size) {
+  if (size <= 0)
+    return true;
+  int i = send(sock, buf, size, 0);
+  if (i < 1)
+    return false;
+  return send_all(sock, buf + i, size - i);
 }
 
 int main() {

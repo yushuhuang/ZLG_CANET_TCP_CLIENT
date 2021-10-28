@@ -38,7 +38,7 @@ void parse_frame(const char (&frame)[13]) {
   printf("%s\n", std::string(80, '-').c_str());
 }
 
-bool recv_all(int sock, char *buf, int size) {
+bool recv_all(int sock, char *buf, size_t size) {
   int pos{0}, tmp_size{0};
   std::vector<unsigned char> tmp_buf(size);
   while (pos < size) {
