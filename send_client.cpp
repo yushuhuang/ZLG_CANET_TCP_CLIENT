@@ -23,6 +23,19 @@ void build_frame(char (&frame)[13], bool FF, bool RTR, uint8_t LEN,
   memcpy(&frame[5], &DATA, sizeof(DATA));
 }
 
+bool send_all(int sock, char *buf, int size) {
+  int tmp_size{0};
+  char *ptr = buf;
+  while (size > 0) {
+    tmp_size = send(sock, ptr, size, 0);
+    if (tmp_size < 1)
+      return false;
+    ptr += tmp_size;
+    size -= tmp_size;
+  }
+  return true;
+}
+
 int main() {
   int sock_fd;
   if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -41,8 +54,8 @@ int main() {
 
   char frame[13];
   build_frame(frame, false, false, 8, 0x100, 0x00112233445566ee);
-  send(sock_fd, &frame, sizeof(frame), 0);
-
+  bool err;
+  err = send_all(sock_fd, frame, 13);
   close(sock_fd);
   return 0;
 }

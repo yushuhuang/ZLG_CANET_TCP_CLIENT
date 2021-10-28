@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <arpa/inet.h>
 #include <cstring>
 #include <inttypes.h>
@@ -37,6 +38,19 @@ void parse_frame(const char (&frame)[13]) {
   printf("%s\n", std::string(80, '-').c_str());
 }
 
+bool recv_all(int sock, char *buf, int size) {
+  int pos{0}, tmp_size{0};
+  std::vector<unsigned char> tmp_buf(size);
+  while (pos < size) {
+    tmp_size = recv(sock, tmp_buf.data(), size - pos, 0);
+    if (tmp_size < 1)
+      return false;
+    std::copy_n(tmp_buf.begin(), tmp_size, &buf[pos]);
+    pos += tmp_size;
+  }
+  return true;
+}
+
 int main() {
   int sock_fd;
   if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -54,8 +68,11 @@ int main() {
   }
 
   char frame[13];
+  bool err;
   for (;;) {
-    recv(sock_fd, &frame, 13, 0);
+    err = recv_all(sock_fd, frame, 13);
+    if (err == false)
+      break;
     parse_frame(frame);
   }
 
