@@ -1,6 +1,6 @@
 import canet
 import socket
-from typing import Union, Tuple, Any
+from typing import Optional, Union, Tuple, Any
 
 _Address = Union[Tuple[Any, ...], str, bytes]
 
@@ -28,12 +28,14 @@ def frame2msg(frame: bytes) -> canet.Message:
 
 class Connection:
 
-    def __init__(self, __address: _Address):
-        self.__address = __address
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def __init__(self, sock: socket = None):
+        if sock:
+            self.s = sock
+        else:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self):
-        self.s.connect(self.__address)
+    def connect(self, __address: _Address):
+        self.s.connect(__address)
 
     def close(self) -> None:
         try:
@@ -45,12 +47,20 @@ class Connection:
     def send(self, msg: canet.Message) -> None:
         self.s.sendall(msg2frame(msg))
 
-    def recv(self) -> canet.Message:
-        data = self.s.recv(13)
-        return frame2msg(data)
+    def recvall(self, n: int) -> Optional[bytes]:
+        data = bytearray()
+        while len(data) < n:
+            packet = self.s.recv(n - len(data))
+            if not packet:
+                return None
+            data.extend(packet)
+        return data
+
+    def recv(self) -> Optional[canet.Message]:
+        data = self.recvall(13)
+        return frame2msg(data) if data else None
 
     def __enter__(self):
-        self.connect()
         return self
 
     def __exit__(self, type, value, traceback):
