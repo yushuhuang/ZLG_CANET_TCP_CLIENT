@@ -68,10 +68,10 @@ int main() {
   }
 
   char frame[13];
-  bool err;
+  bool succeed;
   for (;;) {
-    err = recv_all(sock_fd, frame, 13);
-    if (err == false)
+    succeed = recv_all(sock_fd, frame, 13);
+    if (!succeed)
       break;
     parse_frame(frame);
   }

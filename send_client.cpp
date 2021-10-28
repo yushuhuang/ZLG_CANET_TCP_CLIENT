@@ -54,8 +54,8 @@ int main() {
 
   char frame[13];
   build_frame(frame, false, false, 8, 0x100, 0x00112233445566ee);
-  bool err;
-  err = send_all(sock_fd, frame, 13);
+  bool succeed;
+  succeed = send_all(sock_fd, frame, 13);
   close(sock_fd);
   return 0;
 }
