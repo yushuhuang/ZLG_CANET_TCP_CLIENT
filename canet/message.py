@@ -29,10 +29,9 @@ class Message:
         self.dlc = len(self.data) if not dlc else dlc
 
     def __str__(self) -> str:
-        field_strings = [('{} {} 帧长度: {}'.format(['标准帧', '扩展帧']
-                                                 [self.is_extended_id], ['数据帧', '远程帧'][self.is_remote_frame], self.dlc))]
-        field_strings.append('FRAME ID: 0x{0:0{1}x}'.format(
-            self.arbitration_id, [4, 8][self.is_extended_id]))
-        data = int.from_bytes(self.data, byteorder='big', signed=False)
-        field_strings.append('DATA: 0x{0:0{1}x}'.format(data, self.dlc * 2))
+        field_strings = [
+            f"{['标准帧', '扩展帧'][self.is_extended_id]} {['数据帧', '远程帧'][self.is_remote_frame]} 帧长度：{self.dlc}"]
+        field_strings.append(
+            f'FRAME ID: 0x{self.arbitration_id:0{[4, 8][self.is_extended_id]}x}')
+        field_strings.append(f'DATA: 0x{self.data.hex()[:self.dlc*2]}')
         return "    ".join(field_strings)
