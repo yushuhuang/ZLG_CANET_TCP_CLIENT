@@ -44,8 +44,13 @@ class Connection:
         except Exception:
             pass
 
-    def send(self, msg: canet.Message) -> None:
-        self.s.sendall(msg2frame(msg))
+    def send(self, msg: canet.Message) -> bool:
+        try:
+            self.s.sendall(msg2frame(msg))
+            return True
+        except BrokenPipeError:
+            self.s.close()
+            return False
 
     def recvall(self, n: int) -> Optional[bytes]:
         data = bytearray()

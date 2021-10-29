@@ -14,6 +14,8 @@ msg = canet.Message(arbitration_id=0x100, is_extended_id=False, data=[
 with canet.Connection() as c:
     c.connect((HOST, PORT))
     while True:
-        c.send(msg)
-        print(msg)
-        time.sleep(1)
+        if c.send(msg):
+            print(msg)
+            time.sleep(1)
+        else:
+            break

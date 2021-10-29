@@ -13,3 +13,6 @@ with canet.Connection() as c:
         msg = c.recv()
         if msg:
             print(msg)
+        else:
+            c.close()
+            break
